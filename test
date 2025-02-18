@@ -1,1 +1,48 @@
-(function()%7B(function()%20%7B%0A%20%20%20%20let%20gamePin%20%3D%20prompt(%22Enter%20Kahoot%20Game%20PIN%3A%22)%3B%0A%20%20%20%20let%20baseName%20%3D%20prompt(%22Enter%20nickname%20prefix%3A%22)%3B%0A%20%20%20%20let%20botCount%20%3D%20parseInt(prompt(%22Enter%20number%20of%20bots%3A%22)%2C%2010)%3B%0A%20%20%20%20%0A%20%20%20%20if%20(!gamePin%20%7C%7C%20!baseName%20%7C%7C%20isNaN(botCount)%20%7C%7C%20botCount%20%3C%3D%200)%20%7B%0A%20%20%20%20%20%20%20%20alert(%22Invalid%20input.%20Please%20try%20again.%22)%3B%0A%20%20%20%20%20%20%20%20return%3B%0A%20%20%20%20%7D%0A%20%20%20%20%0A%20%20%20%20function%20joinKahoot(pin%2C%20name)%20%7B%0A%20%20%20%20%20%20%20%20let%20socket%20%3D%20new%20WebSocket(%22wss%3A%2F%2Fkahoot.it%2Fcometd%22)%3B%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20socket.onopen%20%3D%20function()%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20console.log(%60Bot%20%24%7Bname%7D%20attempting%20to%20join%20game%20%24%7Bpin%7D%60)%3B%0A%20%20%20%20%20%20%20%20%20%20%20%20socket.send(JSON.stringify(%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20channel%3A%20%22%2Fservice%2Fcontroller%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20clientId%3A%20Math.random().toString(36).substr(2%2C%209)%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20data%3A%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20type%3A%20%22login%22%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20gameid%3A%20pin%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20name%3A%20name%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D))%3B%0A%20%20%20%20%20%20%20%20%7D%3B%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20socket.onmessage%20%3D%20function(event)%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20console.log(%60Bot%20%24%7Bname%7D%20received%3A%60%2C%20event.data)%3B%0A%20%20%20%20%20%20%20%20%20%20%20%20let%20message%20%3D%20JSON.parse(event.data)%3B%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20(message.data%20%26%26%20message.data.error)%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20console.error(%60Bot%20%24%7Bname%7D%20failed%20to%20join%3A%20%24%7Bmessage.data.error%7D%60)%3B%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20socket.close()%3B%0A%20%20%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20%7D%3B%0A%20%20%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20socket.onerror%20%3D%20function(error)%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20console.error(%60Bot%20%24%7Bname%7D%20encountered%20an%20error%3A%60%2C%20error)%3B%0A%20%20%20%20%20%20%20%20%7D%3B%0A%20%20%20%20%7D%0A%20%20%20%20%0A%20%20%20%20for%20(let%20i%20%3D%201%3B%20i%20%3C%3D%20botCount%3B%20i%2B%2B)%20%7B%0A%20%20%20%20%20%20%20%20setTimeout(()%20%3D%3E%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20joinKahoot(gamePin%2C%20baseName%20%2B%20i)%3B%0A%20%20%20%20%20%20%20%20%7D%2C%20i%20*%201000)%3B%0A%20%20%20%20%7D%0A%20%20%20%20%0A%20%20%20%20alert(%60Attempting%20to%20join%20with%20%24%7BbotCount%7D%20bots.%20Check%20console%20for%20details.%60)%3B%0A%7D)()%3B%7D)()%3B
+(function() {
+    let gamePin = prompt("Enter Kahoot Game PIN:");
+    let baseName = prompt("Enter nickname prefix:");
+    let botCount = parseInt(prompt("Enter number of bots:"), 10);
+    
+    if (!gamePin || !baseName || isNaN(botCount) || botCount <= 0) {
+        alert("Invalid input. Please try again.");
+        return;
+    }
+    
+    function joinKahoot(pin, name) {
+        let socket = new WebSocket("wss://kahoot.it/cometd");
+        
+        socket.onopen = function() {
+            console.log(`Bot ${name} attempting to join game ${pin}`);
+            socket.send(JSON.stringify({
+                channel: "/service/controller",
+                clientId: Math.random().toString(36).substr(2, 9),
+                data: {
+                    type: "login",
+                    gameid: pin,
+                    name: name
+                }
+            }));
+        };
+        
+        socket.onmessage = function(event) {
+            console.log(`Bot ${name} received:`, event.data);
+            let message = JSON.parse(event.data);
+            if (message.data && message.data.error) {
+                console.error(`Bot ${name} failed to join: ${message.data.error}`);
+                socket.close();
+            }
+        };
+        
+        socket.onerror = function(error) {
+            console.error(`Bot ${name} encountered an error:`, error);
+        };
+    }
+    
+    for (let i = 1; i <= botCount; i++) {
+        setTimeout(() => {
+            joinKahoot(gamePin, baseName + i);
+        }, i * 1000);
+    }
+    
+    alert(`Attempting to join with ${botCount} bots. Check console for details.`);
+})();
